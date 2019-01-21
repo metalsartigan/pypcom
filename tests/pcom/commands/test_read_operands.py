@@ -1,13 +1,13 @@
 from unittest import TestCase
 
-from pcom.commands import CommandReadOperands
+from pcom.commands import ReadOperands
 from pcom.commands import operand_request
 
 
-class TestCommandReadOperands(TestCase):
+class TestReadOperands(TestCase):
     def setUp(self):
         super().setUp()
-        self._command = CommandReadOperands(plc_id=0)
+        self._command = ReadOperands(plc_id=0)
 
     def test_request_codes(self):
         self.assertEqual(0x01, operand_request.MB(addresses=[]).code)

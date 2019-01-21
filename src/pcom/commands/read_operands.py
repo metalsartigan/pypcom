@@ -4,7 +4,7 @@ from .operand_request import OperandRequest, OneBitRequest
 from .binary_command import BinaryCommand
 
 
-class CommandReadOperands(BinaryCommand):
+class ReadOperands(BinaryCommand):
     def __init__(self, *, plc_id: int = 0):
         self._requests = []
         super().__init__(command_number=77, plc_id=plc_id)

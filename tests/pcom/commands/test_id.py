@@ -1,12 +1,12 @@
 from unittest import TestCase
 
-from pcom.commands import CommandID
+from pcom.commands import ID
 
 
-class TestCommandID(TestCase):
+class TestID(TestCase):
     def setUp(self):
         super().setUp()
-        self.command = CommandID(plc_id=0)
+        self.command = ID(plc_id=0)
 
     def test_get_bytes(self):
         expected = b'/00IDED\r'

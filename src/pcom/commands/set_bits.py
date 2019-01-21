@@ -1,7 +1,7 @@
 from .ascii_command import AsciiCommand
 
 
-class CommandSetBits(AsciiCommand):
+class SetBits(AsciiCommand):
     OUTPUT = 'SA'
     MEMORY = 'SB'
     SYSTEM = 'SS'

@@ -1,6 +1,6 @@
-from .command_id import CommandID
-from .command_read_operands import CommandReadOperands
-from .command_read_rtc import CommandReadRtc
-from .command_set_bits import CommandSetBits
+from .id import ID
+from .read_operands import ReadOperands
+from .read_rtc import ReadRtc
+from .set_bits import SetBits
 
 from . import operand_request

@@ -1,13 +1,13 @@
 from unittest import TestCase
 
-from pcom.commands import CommandReadRtc
+from pcom.commands import ReadRtc
 from datetime import datetime
 
 
-class TestCommandReadRtc(TestCase):
+class TestReadRtc(TestCase):
     def setUp(self):
         super().setUp()
-        self.command = CommandReadRtc()
+        self.command = ReadRtc()
 
     def test_command_code(self):
         self.assertEqual('RC', self.command.code)

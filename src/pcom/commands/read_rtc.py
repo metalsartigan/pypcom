@@ -3,7 +3,7 @@ from .ascii_command import AsciiCommand
 from datetime import datetime
 
 
-class CommandReadRtc(AsciiCommand):
+class ReadRtc(AsciiCommand):
     def __init__(self, plc_id: int = 0):
         super().__init__(plc_id=plc_id, code='RC')
 
