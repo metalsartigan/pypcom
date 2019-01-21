@@ -16,7 +16,7 @@ class MockBinaryCommand(BinaryCommand):
 
     def get_ethernet_recv_bytes(self):
         transaction = bytearray(b'/_OPLC\xFE') + bytearray([self._plc_id]) + bytearray(b'\x01\x00\x00\x00\xc2\x00\x01\x02\x03\x04\x05\x06\x04\x00\x6a\xfc\x10\x11\x02\x03\xda\xff\x5c')
-        length = len(transaction)
+        length = len(transaction) + 6
         len_bytes = [(length & 0xff), length >> 8]
         return bytearray(b'\x1fhf\x00') + bytearray(len_bytes) + transaction
 

@@ -15,7 +15,7 @@ class MockAsciiCommand(AsciiCommand):
         return self._bytes
 
     def get_ethernet_recv_bytes(self):
-        return bytearray(b'\x1fhe\x00\x08\x00/A\x02\x03\x0409\r')
+        return bytearray(b'\x1fhe\x00\x0e\x00/A\x02\x03\x0409\r')
 
     def get_recv_bytes(self):
         return bytearray(b'/A\x02\x03\x0409\r')

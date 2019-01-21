@@ -62,7 +62,7 @@ class TestEthernetPlc(TestCase):
             command_bytes[2:7],
             command_bytes[7:]
         ]
-        expected = bytearray(b'/_OPLC\xfe\x00\x01\x00\x00\x00\xc2\x00\x01\x02\x03\x04\x05\x06\x04\x00j\xfc\x10\x11\x02\x03\xda\xff\\')
+        expected = bytearray(b'\x10\x11\x02\x03')
 
         actual = self._plc.send(command)
 

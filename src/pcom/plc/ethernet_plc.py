@@ -51,7 +51,7 @@ class EthernetPlc(BasePlc):
                         transaction_size = header[5] << 8 | header[4]
                         end = 6 + transaction_size
                         transaction = self._buffer[:end]
-                        if len(transaction) - 6 == transaction_size:
+                        if len(transaction) == transaction_size:
                             del self._buffer[:end]
                             return transaction
                 elif self._buffer:

@@ -29,7 +29,7 @@ class EthernetCommandWrapper(BaseCommand):
         header = buffer[:6]
         self.__check_reply_header(header)
         command_buffer = buffer[6:]
-        return super().parse_reply(command_buffer)
+        return self.base_command.parse_reply(command_buffer)
 
     def _validate_reply(self, buffer: bytearray):
         self.base_command._validate_reply(buffer)
