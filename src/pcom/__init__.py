@@ -1,2 +1,1 @@
-from . import channels
-from . import pcom_client
+from .plc import EthernetPlc, SerialPlc

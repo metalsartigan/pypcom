@@ -1,6 +1,6 @@
-from pcom.models import AsciiCommand
+from .ascii_command import AsciiCommand
 
 
 class CommandID(AsciiCommand):
-    def __init__(self):
-        super().__init__(code='ID')
+    def __init__(self, plc_id: int = 0):
+        super().__init__(plc_id=plc_id, code='ID')

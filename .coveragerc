@@ -1,0 +1,9 @@
+[run]
+omit =
+  */__init__.py
+  tests/*
+  socket_test.py
+
+[html]
+directory = cov_html
+title = Unit test coverage report
