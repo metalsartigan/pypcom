@@ -10,7 +10,7 @@ class TestAsciiCommand(TestCase):
         self.command = MockAsciiCommand()
 
     def test_validate_frame(self):
-        msg = '0077345'
+        msg = '00MK345'
         frame = bytearray(('/A%s' % msg).encode())
         frame.extend(self.command.get_crc_bytes(msg))
         frame.append(0xd)
@@ -18,7 +18,7 @@ class TestAsciiCommand(TestCase):
         self.command.parse_reply(frame)
 
     def test_validate_frame_wrong_stx(self):
-        msg = '0077345'
+        msg = '00MK345'
         frame = bytearray(('zA%s' % msg).encode())
         frame.extend(self.command.get_crc_bytes(msg))
         frame.append(0xd)
@@ -27,7 +27,7 @@ class TestAsciiCommand(TestCase):
             self.command.parse_reply(frame)
 
     def test_validate_frame_wrong_etx(self):
-        msg = '0077345'
+        msg = '00MK345'
         frame = bytearray(('/A%s' % msg).encode())
         frame.extend(self.command.get_crc_bytes(msg))
         frame.append(0xe)
@@ -36,7 +36,7 @@ class TestAsciiCommand(TestCase):
             self.command.parse_reply(frame)
 
     def test_validate_frame_wrong_crc(self):
-        msg = '0077345'
+        msg = '00MK345'
         frame = bytearray(('/A%s' % msg).encode())
         frame.extend(bytearray([0, 0]))
         frame.append(0xd)

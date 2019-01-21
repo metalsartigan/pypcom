@@ -33,7 +33,7 @@ class TestEthernetPlc(TestCase):
         mock_recv.return_value = command.get_ethernet_recv_bytes()
         wrapper = EthernetCommandWrapper(command)
         expected_send = wrapper.get_bytes()
-        expected = bytearray(b'/A\x02\x03\x0409\r')
+        expected = bytearray(b'\x02\x03\x04')
 
         actual = self._plc.send(command)
 

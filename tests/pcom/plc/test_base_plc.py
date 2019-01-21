@@ -27,7 +27,7 @@ class TestBasePlc(TestCase):
         reply = self._plc.send(command)
         mock_send.assert_called_once_with(bytearray([1, 2, 3, 4]))
         mock_receive.assert_called_once()
-        self.assertEqual(bytearray(b'/A\x02\x03\x0409\r'), reply)
+        self.assertEqual(bytearray(b'\x02\x03\x04'), reply)
 
     def test_send_overflow(self):
         command = MockAsciiCommand()

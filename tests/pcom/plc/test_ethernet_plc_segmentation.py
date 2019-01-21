@@ -36,7 +36,7 @@ class TestEthernetPlc(TestCase):
 
         res = self._plc.send(command)
 
-        self.assertEqual(bytearray(b'/A\x02\x03\x0409\r'), res)
+        self.assertEqual(bytearray(b'\x02\x03\x04'), res)
 
     def test_recv_segmentation_ascii_timeout(self, mock_recv, *args):
         command = MockAsciiCommand()

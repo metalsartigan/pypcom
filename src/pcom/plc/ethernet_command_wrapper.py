@@ -26,15 +26,12 @@ class EthernetCommandWrapper(BaseCommand):
         return bytearray(header)
 
     def parse_reply(self, buffer: bytearray):
-        header = buffer[:6]
-        self.__check_reply_header(header)
+        super().parse_reply(buffer)
         command_buffer = buffer[6:]
         return self.base_command.parse_reply(command_buffer)
 
     def _validate_reply(self, buffer: bytearray):
-        self.base_command._validate_reply(buffer)
-
-    def __check_reply_header(self, header: bytearray):
+        header = buffer[:6]
         header_bytes = self.__get_header()
         expected = header_bytes[:4]
         actual = header[:4]

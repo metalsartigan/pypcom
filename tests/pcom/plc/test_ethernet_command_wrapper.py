@@ -19,9 +19,9 @@ class TestEthernetCommandWrapper(TestCase):
         self.assertEqual(expected, actual)
 
     def test_parse_reply(self):
-        buffer = bytearray(b'\x1fhe\x00C\x00/A00ID10T2A00400431B00200248P00100315F03100003FT0102301023A0\r')
+        buffer = bytearray(b'\x1fhe\x00C\x00/A00MK10T2A00400431B00200248P00100315F03100003FT0102301023AB\r')
         actual = self.wrapper.parse_reply(buffer)
-        expected = bytearray(b'/A00ID10T2A00400431B00200248P00100315F03100003FT0102301023A0\r')
+        expected = bytearray(b'10T2A00400431B00200248P00100315F03100003FT0102301023')
         self.assertEqual(expected, actual)
 
     def test_command_id(self):

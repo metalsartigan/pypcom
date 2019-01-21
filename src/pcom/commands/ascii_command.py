@@ -7,12 +7,12 @@ from .base_command import BaseCommand, PROTOCOL_ASCII
 class AsciiCommand(BaseCommand):
     def __init__(self, *, plc_id: int = 0, code: str, parameters: str = ''):
         super().__init__(plc_id=plc_id, protocol=PROTOCOL_ASCII)
-        self._code = code
+        self.code = code
         self._parameters = parameters
 
     def get_bytes(self):
         frame = bytearray([0x2f])
-        msg = '%02d%s%s' % (self._plc_id, self._code, self._parameters)
+        msg = '%02d%s%s' % (self._plc_id, self.code, self._parameters)
         frame.extend(msg.encode())
         frame.extend(self._get_crc_bytes(msg))
         frame.append(0xd)
@@ -24,8 +24,14 @@ class AsciiCommand(BaseCommand):
         hex_str = hex_str.zfill(2)
         return hex_str.upper().encode()
 
+    def parse_reply(self, buffer: bytearray):
+        buffer = super().parse_reply(buffer)
+        return buffer[6:-3]
+
     def _validate_reply(self, buffer: bytearray):
         self.__validate_stx(buffer)
+        self.__validate_plc_id(buffer)
+        self.__validate_command_code(buffer)
         self.__validate_etx(buffer)
         self.__validate_crc(buffer)
 
@@ -33,6 +39,16 @@ class AsciiCommand(BaseCommand):
         expected = bytearray('/A'.encode())
         if buffer[:2] != expected:
             raise PComError("Invalid STX in reply. Expected: '%s', got: '%s'" % (expected, buffer[:2]))
+
+    def __validate_plc_id(self, buffer: bytearray):
+        expected = bytearray(('%02d' % self._plc_id).encode())
+        if buffer[2:4] != expected:
+            raise PComError("Invalid PLC ID in reply. Expected: '%s', got: '%s'" % (expected, buffer[2:4]))
+
+    def __validate_command_code(self, buffer: bytearray):
+        expected = bytearray(self.code.encode())
+        if buffer[4:6] != expected:
+            raise PComError("Invalid Command Code in reply. Expected: '%s', got: '%s'" % (expected, buffer[4:6]))
 
     def __validate_etx(self, buffer: bytearray):
         if buffer[-1] != 0xd:
