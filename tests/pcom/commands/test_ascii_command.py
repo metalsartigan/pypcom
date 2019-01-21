@@ -26,6 +26,24 @@ class TestAsciiCommand(TestCase):
         with self.assertRaisesRegex(PComError, "STX"):
             self.command.parse_reply(frame)
 
+    def test_validate_frame_wrong_plc_id(self):
+        msg = '01MK345'
+        frame = bytearray(('/A%s' % msg).encode())
+        frame.extend(self.command.get_crc_bytes(msg))
+        frame.append(0xd)
+
+        with self.assertRaisesRegex(PComError, "PLC ID"):
+            self.command.parse_reply(frame)
+
+    def test_validate_frame_wrong_command_code(self):
+        msg = '00ZZ345'
+        frame = bytearray(('/A%s' % msg).encode())
+        frame.extend(self.command.get_crc_bytes(msg))
+        frame.append(0xd)
+
+        with self.assertRaisesRegex(PComError, "Command Code"):
+            self.command.parse_reply(frame)
+
     def test_validate_frame_wrong_etx(self):
         msg = '00MK345'
         frame = bytearray(('/A%s' % msg).encode())
