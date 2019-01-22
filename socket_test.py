@@ -1,5 +1,4 @@
 from pcom import commands
-from pcom.commands import operand_request
 from pcom.plc import EthernetPlc
 import time
 
