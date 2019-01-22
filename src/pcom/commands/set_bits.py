@@ -1,7 +1,7 @@
-from .ascii_command import AsciiCommand
+from .ascii_write_command import AsciiWriteCommand
 
 
-class SetBits(AsciiCommand):
+class SetBits(AsciiWriteCommand):
     OUTPUT = 'SA'
     MEMORY = 'SB'
     SYSTEM = 'SS'
@@ -11,7 +11,3 @@ class SetBits(AsciiCommand):
         parameters += hex(len(values))[2:].upper().zfill(2)
         parameters += ''.join('1' if v else '0' for v in values)
         super().__init__(plc_id=plc_id, code=code, parameters=parameters)
-
-    def parse_reply(self, buffer: bytearray):
-        buffer = super().parse_reply(buffer).decode()
-        return buffer == ''

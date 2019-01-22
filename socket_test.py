@@ -3,8 +3,10 @@ from pcom.commands import operand_request
 from pcom.plc import EthernetPlc
 import time
 
-with EthernetPlc(address=('192.168.5.43', 20256)) as plc:
-    c2 = commands.CommandID()
+from datetime import datetime
+
+with EthernetPlc(address=('192.168.5.43', 1616)) as plc:
+    c2 = commands.ID()
 
     values = [True, False, True, True, False]
 
@@ -12,12 +14,15 @@ with EthernetPlc(address=('192.168.5.43', 20256)) as plc:
     count = 0
     while run:
         count += 1
-        c = commands.CommandSetBits(code=commands.CommandSetBits.MEMORY, address=300, values=values)
+        #c = commands.SetBits(code=commands.SetBits.MEMORY, address=300, values=values)
+        c = commands.SetRtc(value=datetime.now())
+        #c = commands.SetRtc(value=datetime(2018, 12, 13, 14, 43, 10))
+
         res = plc.send(c)
         print(res)
 
         print('request number:', count)
-        run = True
+        run = False
 
         for i in range(len(values)):
             values[i] = not values[i]
