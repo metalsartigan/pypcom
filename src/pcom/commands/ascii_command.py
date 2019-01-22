@@ -38,25 +38,25 @@ class AsciiCommand(BaseCommand):
     def __validate_stx(self, buffer: bytearray):
         expected = bytearray('/A'.encode())
         if buffer[:2] != expected:
-            raise PComError("Invalid STX in reply. Expected: '%s', got: '%s'" % (expected, buffer[:2]))
+            raise PComError("Invalid STX in reply. Expected: '%s', got: '%s'" % (expected, buffer[:2]), buffer)
 
     def __validate_plc_id(self, buffer: bytearray):
         expected = bytearray(('%02d' % self._plc_id).encode())
         if buffer[2:4] != expected:
-            raise PComError("Invalid PLC ID in reply. Expected: '%s', got: '%s'" % (expected, buffer[2:4]))
+            raise PComError("Invalid PLC ID in reply. Expected: '%s', got: '%s'" % (expected, buffer[2:4]), buffer)
 
     def __validate_command_code(self, buffer: bytearray):
         expected = bytearray(self.code.encode())
         if buffer[4:6] != expected:
-            raise PComError("Invalid Command Code in reply. Expected: '%s', got: '%s'" % (expected, buffer[4:6]))
+            raise PComError("Invalid Command Code in reply. Expected: '%s', got: '%s'" % (expected, buffer[4:6]), buffer)
 
     def __validate_etx(self, buffer: bytearray):
         if buffer[-1] != 0xd:
-            raise PComError("Invalid ETX in reply. Expected: '%s', got: '%s'" % (0xd, buffer[-1]))
+            raise PComError("Invalid ETX in reply. Expected: '%s', got: '%s'" % (0xd, buffer[-1]), buffer)
 
     def __validate_crc(self, buffer: bytearray):
         actual = buffer[-3:-1]
         data = buffer[2:-3].decode()
         expected = self._get_crc_bytes(data)
         if actual != expected:
-            raise PComError("Invalid CRC in reply. Expected: '%s', got: '%s'" % (expected, actual))
+            raise PComError("Invalid CRC in reply. Expected: '%s', got: '%s'" % (expected, actual), buffer)

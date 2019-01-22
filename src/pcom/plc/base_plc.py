@@ -15,7 +15,7 @@ class BasePlc(ABC):
     def send(self, command: BaseCommand):
         send_buffer = command.get_bytes()
         if len(send_buffer) > 500:
-            raise PComError('The PLC cannot accept messages that are longer than 500 bytes.')
+            raise PComError('The PLC cannot accept messages that are longer than 500 bytes.', send_buffer)
         self._send_bytes(send_buffer)
         buffer = self._receive_bytes()
         return command.parse_reply(buffer)

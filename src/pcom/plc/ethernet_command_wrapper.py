@@ -36,4 +36,4 @@ class EthernetCommandWrapper(BaseCommand):
         expected = header_bytes[:4]
         actual = header[:4]
         if actual != expected:
-            raise PComError("Ethernet header mismatch. Expected: '%s' found: '%s'" % (expected, actual))
+            raise PComError("Ethernet header mismatch. Expected: '%s' found: '%s'" % (expected, actual), buffer)

@@ -62,35 +62,35 @@ class BinaryCommand(BaseCommand, ABC):
 
     def __validate_stx(self, buffer: bytearray):
         if buffer[:6] != bytearray(self._stx):
-            raise PComError("Invalid STX in reply. Expected: '%s', got: '%s'" % (bytearray(self._stx), buffer[:6]))
+            raise PComError("Invalid STX in reply. Expected: '%s', got: '%s'" % (bytearray(self._stx), buffer[:6]), buffer)
 
     def __validate_canbus_id(self, buffer: bytearray):
         if buffer[6:8] != bytearray([0xfe, self._plc_id]):
-            raise PComError("Invalid plc id in reply. Expected: '%s', got: '%s'" % ([0xfe, self._plc_id], buffer[6:8]))
+            raise PComError("Invalid plc id in reply. Expected: '%s', got: '%s'" % ([0xfe, self._plc_id], buffer[6:8]), buffer)
 
     def __validate_command_number(self, buffer: bytearray):
         expected = self._command_number + 0x80
         if buffer[12] != expected:
-            raise PComError("Invalid command number in reply. Expected: '%s', got: '%s'" % (expected, buffer[12]))
+            raise PComError("Invalid command number in reply. Expected: '%s', got: '%s'" % (expected, buffer[12]), buffer)
 
     def __validate_data_length(self, buffer: bytearray):
         expected = buffer[20] | buffer[21] << 8
         actual = len(buffer[24:-3])
         if expected != actual:
-            raise PComError("Invalid data length in reply. Expected: '%s', got: '%s'" % (expected, actual))
+            raise PComError("Invalid data length in reply. Expected: '%s', got: '%s'" % (expected, actual), buffer)
 
     def __validate_header_crc(self, buffer: bytearray):
         actual = bytearray(buffer[22:24])
         expected = bytearray(self._get_crc_bytes(buffer[:22]))
         if expected != actual:
-            raise PComError("Invalid CRC in reply header. Expected: '%s', got: '%s'" % (expected, actual))
+            raise PComError("Invalid CRC in reply header. Expected: '%s', got: '%s'" % (expected, actual), buffer)
 
     def __validate_details_crc(self, buffer: bytearray):
         actual = bytearray(buffer[-3:-1])
         expected = bytearray(self._get_crc_bytes(buffer[24:-3]))
         if expected != actual:
-            raise PComError("Invalid CRC in reply details. Expected: '%s', got: '%s'" % (expected, actual))
+            raise PComError("Invalid CRC in reply details. Expected: '%s', got: '%s'" % (expected, actual), buffer)
 
     def __validate_etx(self, buffer: bytearray):
         if buffer[-1] != 0x5c:
-            raise PComError("Invalid ETX in reply. Expected: '%s', got: '%s'" % (0x5c, buffer[-1]))
+            raise PComError("Invalid ETX in reply. Expected: '%s', got: '%s'" % (0x5c, buffer[-1]), buffer)
