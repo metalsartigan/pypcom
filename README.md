@@ -1,7 +1,7 @@
-#pcom#
+# pcom
 Metal Sartigan package for PCOM
 
-###Build and release###
+### Build and release
 Make sure the `setup.py` file is up to date with at least the current version.
 
 Then, in the `src` folder:
