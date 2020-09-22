@@ -6,7 +6,11 @@ from pcom.errors import PComError
 
 class BasePlc(ABC):
     def __enter__(self):
-        self._connect()
+        try:
+            self._connect()
+        except Exception:
+            self._close()
+            raise
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

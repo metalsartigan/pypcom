@@ -1,19 +1,19 @@
 import errno
 import os
-import socket
 
 from unittest import TestCase
 from unittest.mock import patch
 
 from pcom import EthernetPlc
 from pcom.errors import PComError
+from pcom.plc import ethernet_plc
 from pcom.plc.ethernet_command_wrapper import EthernetCommandWrapper
 from tests.pcom.commands.mock_binary_command import MockBinaryCommand
 from tests.pcom.commands.mock_ascii_command import MockAsciiCommand
 
 
-@patch.object(socket.socket, 'close')
-@patch.object(socket.socket, 'connect')
+@patch.object(ethernet_plc.socket.socket, 'close', side_effect=ethernet_plc.socket.socket.close, autospec=True)
+@patch.object(ethernet_plc.socket.socket, 'connect')
 @patch.object(EthernetCommandWrapper, '_create_command_id', return_value=[31, 104])
 @patch.object(EthernetPlc, '_send_bytes')
 @patch.object(EthernetPlc, '_socket_recv')
@@ -34,7 +34,8 @@ class TestEthernetPlc(TestCase):
             command_bytes[7:]
         ]
 
-        res = self._plc.send(command)
+        with self._plc:
+            res = self._plc.send(command)
 
         self.assertEqual(bytearray(b'\x02\x03\x04'), res)
 
@@ -46,11 +47,12 @@ class TestEthernetPlc(TestCase):
             segment1,
             command_bytes[:2],
             command_bytes[2:7],
-            socket.timeout(os.strerror(errno.ETIMEDOUT))
+            ethernet_plc.socket.timeout(os.strerror(errno.ETIMEDOUT))
         ]
 
-        with self.assertRaisesRegex(PComError, 'timed out'):
-            self._plc.send(command)
+        with self._plc:
+            with self.assertRaisesRegex(PComError, 'timed out'):
+                self._plc.send(command)
 
     def test_recv_segmentation_binary(self, mock_recv, *args):
         command = MockBinaryCommand()
@@ -64,6 +66,7 @@ class TestEthernetPlc(TestCase):
         ]
         expected = bytearray(b'\x10\x11\x02\x03')
 
-        actual = self._plc.send(command)
+        with self._plc:
+            actual = self._plc.send(command)
 
         self.assertEqual(expected, actual)

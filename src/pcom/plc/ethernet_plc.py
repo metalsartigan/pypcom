@@ -13,10 +13,11 @@ class EthernetPlc(BasePlc):
         super().__init__()
         self._address = address
         self._timeout = timeout
-        self._socket = socket.socket()
+        self._socket = None
         self._buffer = bytearray()
 
     def _connect(self):
+        self._socket = socket.socket()
         self._socket.settimeout(self._timeout)
         try:
             self._socket.connect(self._address)
@@ -29,7 +30,8 @@ class EthernetPlc(BasePlc):
                 raise
 
     def _close(self):
-        self._socket.close()
+        if self._socket:
+            self._socket.close()
 
     def send(self, command: BaseCommand):
         command = EthernetCommandWrapper(command)
