@@ -1,3 +1,4 @@
+from . import datatables
 from .id import ID
 from .read_operands import ReadOperands
 from .read_rtc import ReadRtc

@@ -33,6 +33,9 @@ class BinaryCommand(BaseCommand, ABC):
     def _to_little_endian(self, word):
         return [word & 255, word >> 8]
 
+    def _to_long_little_endian(self, word):
+        return [word & 255, word >> 8, word >> 16, word >> 32]
+
     def _get_crc_bytes(self, data):
         val = ~(sum(data) % 0x10000) + 1
         val = val & 0xffff  # convert to unsigned value
