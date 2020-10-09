@@ -9,7 +9,7 @@ class TestReadDatatable(BaseTest):
                                                  start_column_index=1, column_count=2)
 
     def test_get_bytes_specific(self):
-        expected = bytearray(b'/_OPLC\x00\xfe\x01\x00\x00\x00\x04\x00Z\x00\x00\x00\x00\x00 \x00\xc7\xfc\t\x00\n\x00\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xde\xff\\')
+        expected = bytearray(b'/_OPLC\x00\xfe\x01\x00\x00\x00\x04\x00f\x00\x00\x00\x00\x00 \x00\xbb\xfc\t\x00\n\x00\x13\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xda\xff\\')
 
         actual = self._command.get_bytes()
 
@@ -39,8 +39,8 @@ class TestReadDatatable(BaseTest):
         actual = command.parse_reply(raw_reply)
 
         expected = [
-            [1000000009, 2000004044, 3039755178, [True], 48281, 552731650, 1099065408, 2020, 610, 1250, 25, -12266, -32736, [False], [False]],
-            [1000000009, 2000003891, 3003261303, [False], 15211, 552731650, 1099065408, 2020, 610, 1242, 40, -12266, -32736, [False], [False]],
+            [[1000000009], [2000004044], [3039755178], [True], [48281], [552731650], [1099065408], [2020], [610], [1250], [25], [-12266], [-32736], [False], [False]],
+            [[1000000009], [2000003891], [3003261303], [False], [15211], [552731650], [1099065408], [2020], [610], [1242], [40], [-12266], [-32736], [False], [False]],
         ]
 
         self.assertListEqual(expected, actual)

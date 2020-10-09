@@ -1,9 +1,10 @@
+from .datatable_command import DatatableCommand
 from .structure import DatatableStructure
-from ..binary_command import BinaryCommand
 
 
-class ReadDatatable(BinaryCommand):
-    def __init__(self, *, structure: DatatableStructure, start_row_index: int = 0, row_count: int = 0, start_column_index: int = 0, column_count: int = 0, plc_id: int = 0):
+class ReadDatatable(DatatableCommand):
+    def __init__(self, *, structure: DatatableStructure, start_row_index: int = 0, row_count: int = 0,
+                 start_column_index: int = 0, column_count: int = 0, plc_id: int = 0):
         """Read a number of rows in a datatable and return the result in a list.
 
         :param structure: a DatatableStructure object defining the structure of the table to be read.
@@ -13,18 +14,7 @@ class ReadDatatable(BinaryCommand):
         :param start_column_index: Index of the first column to read. Default: 0
         :param column_count: The number of columns to read. 0 will read until the last column. Default: 0
         """
-        super().__init__(command_number=4, plc_id=plc_id)
-        self._table_structure = structure
-        self._start_row_index = start_row_index
-        self._row_count = row_count
-        self._start_column_index = start_column_index
-        self._column_count = column_count
-
-    def _get_command_args(self):
-        offset = self._table_structure.get_cell_offset(self._start_row_index, self._start_column_index)
-        args = self._to_long_little_endian(offset)
-        args.extend([0, 0])  # bytes 18 and 19 are not used.
-        return args
+        super().__init__(4, structure, start_row_index, row_count, start_column_index, column_count, plc_id)
 
     def _get_command_details(self):
         data_size = self._table_structure.get_row_size(self._start_column_index, self._column_count)

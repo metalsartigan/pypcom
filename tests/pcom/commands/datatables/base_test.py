@@ -12,6 +12,7 @@ class BaseTest(TestCase):
             datatables.Bool(9),
             datatables.Bool(),
             datatables.Bool(),
+            datatables.Int(2),
             datatables.Byte()
         ]
         self._structure = datatables.DatatableStructure("Some table", offset=44, rows=22, columns=self._columns)

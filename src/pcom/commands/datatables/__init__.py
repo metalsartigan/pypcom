@@ -10,3 +10,5 @@ from .structure import String
 from .structure import Timer
 from .structure import UInt
 from .structure import ULong
+from .write_datatable import WriteDatatable
+from .write_datatable import WriteDatatableError

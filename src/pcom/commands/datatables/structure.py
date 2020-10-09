@@ -2,8 +2,12 @@ import abc
 import struct
 
 from collections import deque
-from itertools import groupby
-from typing import List
+from typing import Any, List
+
+
+def _chunks(l, n):
+    n = max(1, n)
+    return [l[i:i + n] for i in range(0, len(l), n)]
 
 
 class DataType(abc.ABC):
@@ -18,26 +22,56 @@ class DataType(abc.ABC):
 
     @abc.abstractmethod
     def parse_value(self, data: List[int]):  # pragma: nocover
-        raise NotImplemented()
+        pass
+
+    @abc.abstractmethod
+    def get_data_for_details(self, values: Any):  # pragma: nocover
+        pass
+
+    def _get_data_for_details(self, format: str, values: Any):
+        buffer = bytearray()
+        for value in values:
+            buffer += struct.pack(format, value)
+        return list(buffer)
+
+    @abc.abstractmethod
+    def validate_values(self, values: Any):  # pragma: nocover
+        pass
 
 
 class Bool(DataType):
-    def __init__(self, size=1):
+    def __init__(self, number_of_elements: int = 1):
+        self._number_of_elements = number_of_elements
+        nb_fully_used_bytes = number_of_elements // 8
+        nb_partially_used_bytes = min(1, number_of_elements % 8) if number_of_elements >= 8 else 1
+        size = nb_fully_used_bytes + nb_partially_used_bytes
         super().__init__(size)
-
-    @property
-    def size(self):
-        nb_fully_used_bytes = self._size // 8
-        nb_partially_used_bytes = min(1, self._size % 8) if self._size >= 8 else 1
-        return nb_fully_used_bytes + nb_partially_used_bytes
 
     def parse_value(self, data: List[int]):
         values = []
-        for i in range(self._size):
+        for i in range(self._number_of_elements):
             number_index = i // 8
             value = (data[number_index] >> (i % 8)) & 0x01
             values.append(bool(value))
         return values
+
+    def get_data_for_details(self, values: List[bool]):
+        buffer = []
+        boolean_bytes = _chunks(values, 8)
+        for boolean_byte in boolean_bytes:
+            byte = 0x00
+            for i in range(len(boolean_byte)):
+                if boolean_byte[i]:
+                    byte |= 0x01 << i
+            buffer.append(byte)
+        return buffer
+
+    def validate_values(self, values: List[bool]):
+        if not all(type(v) is bool for v in values):
+            raise ValueError("Values for Bool column must be booleans. Values: %s" % values)
+        if len(values) != self._number_of_elements:
+            raise ValueError("Values for Bool column do not match its structure. Column size: %d, values: %s" % (
+                self._number_of_elements, values))
 
 
 class String(DataType):
@@ -49,58 +83,156 @@ class String(DataType):
     def parse_value(self, data: List[int]):
         return ''.join(chr(v) for v in data)
 
+    def get_data_for_details(self, values: str):
+        return [ord(c) for c in values]
+
+    def validate_values(self, values: str):
+        if type(values) is not str:
+            raise ValueError("Values for String column must be a string. Value: %s" % values)
+        if len(values) != self._size:
+            raise ValueError("Values for String column do not match its structure. Column size: %d, values: %s" % (
+                self._size, values))
+
 
 class Byte(DataType):
-    def __init__(self):
-        super().__init__(1)
+    def __init__(self, number_of_elements: int = 1):
+        super().__init__(number_of_elements)
 
     def parse_value(self, data: List[int]):
-        return int(data[0])
+        return [int(d) for d in data]
+
+    def get_data_for_details(self, values: List[int]):
+        return values
+
+    def validate_values(self, values: List[int]):
+        if any(type(v) is not int for v in values):
+            raise ValueError("Values for Byte column must be numeric. Values: %s" % values)
+        if len(values) != self._size:
+            raise ValueError(
+                "Values for Byte column do not match its structure. Column size: %d, values: %s" % (self._size, values))
+        if not all(0 <= v <= 255 for v in values):
+            raise ValueError("Byte values must be between 0 and 255. Values: %s" % values)
 
 
 class UInt(DataType):
-    def __init__(self):
-        super().__init__(2)
+    def __init__(self, number_of_elements: int = 1):
+        super().__init__(number_of_elements * 2)
 
     def parse_value(self, data: List[int]):
-        return struct.unpack('<H', bytes(data))[0]
+        return [struct.unpack('<H', bytes(c))[0] for c in _chunks(data, 2)]
+
+    def get_data_for_details(self, values: List[int]):
+        return self._get_data_for_details('<H', values)
+
+    def validate_values(self, values: List[int]):
+        if any(type(v) is not int for v in values):
+            raise ValueError("Values for Unsigned Integer column must be numeric. Values: %s" % values)
+        if len(values) != self._size / 2:
+            raise ValueError("Values for Unsigned Integer do not match its structure. Column size: %d, values: %s" % (
+                self._size / 2, values))
+        if not all(0 <= v <= 65535 for v in values):
+            raise ValueError("Unsigned Integer values must be between 0 and 65535.")
 
 
 class Int(UInt):
     def parse_value(self, data: List[int]):
-        return struct.unpack('<h', bytes(data))[0]
+        return [struct.unpack('<h', bytes(c))[0] for c in _chunks(data, 2)]
+
+    def get_data_for_details(self, values: List[int]):
+        return self._get_data_for_details('<h', values)
+
+    def validate_values(self, values: List[int]):
+        if any(type(v) is not int for v in values):
+            raise ValueError("Values for Integer column must be numeric. Values: %s" % values)
+        if len(values) != self._size / 2:
+            raise ValueError(
+                "Values for Integer do not match its structure. Column size: %d, values: %s" % (self._size / 2, values))
+        if not all(-32768 <= v <= 32767 for v in values):
+            raise ValueError("Integer values must be between -32768 and 32767.")
 
 
 class ULong(DataType):
-    def __init__(self):
-        super().__init__(4)
+    def __init__(self, number_of_elements: int = 1):
+        super().__init__(number_of_elements * 4)
 
     def parse_value(self, data: List[int]):
-        return struct.unpack('<I', bytes(data))[0]
+        return [struct.unpack('<I', bytes(c))[0] for c in _chunks(data, 4)]
+
+    def get_data_for_details(self, values: List[int]):
+        return self._get_data_for_details('<I', values)
+
+    def validate_values(self, values: List[int]):
+        if any(type(v) is not int for v in values):
+            raise ValueError("Values for Unsigned Long column must be numeric. Values: %s" % values)
+        if len(values) != self._size / 4:
+            raise ValueError("Values for Unsigned Long do not match its structure. Column size: %d, values: %s" % (
+                self._size / 4, values))
+        if not all(0 <= v <= 4294967295 for v in values):
+            raise ValueError("Unsigned Long values must be between 0 and 4294967295.")
 
 
 class Long(ULong):
     def parse_value(self, data: List[int]):
-        return struct.unpack('<i', bytes(data))[0]
+        return [struct.unpack('<i', bytes(c))[0] for c in _chunks(data, 4)]
+
+    def get_data_for_details(self, values: List[int]):
+        return self._get_data_for_details('<i', values)
+
+    def validate_values(self, values: List[int]):
+        if any(type(v) is not int for v in values):
+            raise ValueError("Values for Long column must be numeric. Values: %s" % values)
+        if len(values) != self._size / 4:
+            raise ValueError(
+                "Values for Long do not match its structure. Column size: %d, values: %s" % (self._size / 4, values))
+        if not all(-2147483648 <= v <= 2147483647 for v in values):
+            raise ValueError("Long values must be between -2147483648 and 2147483647.")
 
 
 class Float(DataType):
-    def __init__(self):
-        super().__init__(4)
+    def __init__(self, number_of_elements: int = 1):
+        super().__init__(number_of_elements * 4)
 
     def parse_value(self, data: List[int]):
-        buffer = bytes(data[2:] + data[:2])
-        return struct.unpack('<f', buffer)[0]
+        return [struct.unpack('<f', bytes(c[2:] + c[:2]))[0] for c in _chunks(data, 4)]
+
+    def get_data_for_details(self, values: List[float]):
+        buffer = bytearray()
+        for value in values:
+            bytes = struct.pack('<f', value)
+            buffer += bytes[2:] + bytes[:2]
+        return list(buffer)
+
+    def validate_values(self, values: List[int]):
+        if any(type(v) not in (int, float) for v in values):
+            raise ValueError("Values for Float column must be numeric. Values: %s" % values)
+        if len(values) != self._size / 4:
+            raise ValueError(
+                "Values for Float do not match its structure. Column size: %d, values: %s" % (self._size / 4, values))
+        if not all(-3.4e+38 <= v <= 3.4e+38 for v in values):
+            raise ValueError("Float values must be between 1.18e-38 and 3.4e+38.")
 
 
 class Timer(DataType):
-    def __init__(self):
-        super().__init__(12)
+    def __init__(self, number_of_elements: int = 1):
+        super().__init__(number_of_elements * 12)
 
     def parse_value(self, data: List[int]):
         # There is no documentation on this type of column.
         # https://forum.unitronics.com/topic/7631-how-to-read-a-timer-column-in-a-datatable/
-        return data
+        return _chunks(data, 12)
+
+    def get_data_for_details(self, values: List[int]):
+        return [n for v in values for n in v]
+
+    def validate_values(self, values: List[int]):
+        if any(type(v) is not list for v in values):
+            raise ValueError("Values for Timer column must be lists of twelve integers. Values: %s" % values)
+        for v in values:
+            if any(type(n) is not int for n in v) or len(v) != 12:
+                raise ValueError("Timer values should be four integers")
+        if len(values) != self._size / 12:
+            raise ValueError(
+                "Values for Timer do not match its structure. Column size: %d, values: %s" % (self._size / 12, values))
 
 
 class DatatableStructure:
@@ -169,12 +301,8 @@ class DatatableStructure:
         return [self._parse_result_row(row) for row in reply_rows]
 
     def _split_reply_into_raw_rows(self, reply, start_column_index, column_count):
-        def chunks(l, n):
-            n = max(1, n)
-            return [l[i:i + n] for i in range(0, len(l), n)]
-
         row_size = self.get_row_size(start_column_index, column_count)
-        return chunks(reply, row_size)
+        return _chunks(reply, row_size)
 
     def _parse_result_row(self, raw_row):
         row_queue = deque(raw_row)
@@ -184,3 +312,22 @@ class DatatableStructure:
             column_value = column.parse_value(column_data)
             row.append(column_value)
         return row
+
+    def validate_row_values(self, row_values: List[list], *, start_column_index: int):
+        if not 0 <= start_column_index <= (len(self._columns) - 1):
+            raise ValueError("Invalid start_column_index: %d" % start_column_index)
+        actual, expected = len(row_values), len(self._columns) - start_column_index
+        if actual == 0:
+            raise ValueError("Row has no value, expected %d." % expected)
+        if actual > expected:
+            raise ValueError("The number of values in row exceeds what is expected. Expected %d, got %d." % (actual, expected))
+        for i, column_values in enumerate(row_values):
+            self._columns[start_column_index + i].validate_values(column_values)
+
+    def get_row_data_for_details(self, row_values: List[list], *, start_column_index: int):
+        if not 0 <= start_column_index <= (len(self._columns) - 1):
+            raise ValueError("Invalid start_column_index: %d" % start_column_index)
+        buffer = []
+        for i, column_values in enumerate(row_values):
+            buffer.extend(self._columns[start_column_index + i].get_data_for_details(column_values))
+        return buffer

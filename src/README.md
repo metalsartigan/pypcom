@@ -38,7 +38,7 @@ from pcom.plc import EthernetPlc
 with EthernetPlc(address=('192.168.5.47', 1616)) as plc:
     table_structure = commands.datatables.DatatableStructure("My table", offset=19000, rows=2, columns=[
         commands.datatables.Int(),
-        commands.datatables.Int(),
+        commands.datatables.Int(2),
         commands.datatables.Int(),
         commands.datatables.Int(),
         commands.datatables.Long(),
@@ -48,13 +48,40 @@ with EthernetPlc(address=('192.168.5.47', 1616)) as plc:
     print('My table', res)
 ```
 
+Writing to a datatable is very much alike:
+
+```
+from pcom import commands
+from pcom.plc import EthernetPlc
+
+
+with EthernetPlc(address=('192.168.5.47', 1616)) as plc:
+    table_structure = commands.datatables.DatatableStructure("My table", offset=19000, rows=2, columns=[
+        commands.datatables.Int(2),
+        commands.datatables.Int(),
+        commands.datatables.String(5),
+        commands.datatables.Int(),
+        commands.datatables.Int(),
+        commands.datatables.Long(),
+    ])
+
+    rows = [
+        [[11, 12], [13], "hello", [14], [15], [-673542]],
+        [[11, 14], [15], "bye  ", [16], [17], [655666]],
+    ]
+    c = commands.datatables.WriteDatatable(structure=table_structure, data=rows)
+    try:
+        plc.send(c)
+    except datatables.WriteDatatableError as ex:
+        print(ex)
+```
+
 ### Known limitations
 - General:
     - Serial communication is not implemented yet.
 - Datatables:
-    - Multiple elements in a single column is not supported, except for
-    boolean columns, though untested.
     - "Part of project" columns are not supported.
-    - Timer columns cannot be read from or written to. Although a read
-    command will at least return the raw data as returned from the PLC.
+    - Timer columns are treated as raw data. A read command will return the
+    data as returned from the PLC, and a list of 12 bytes is required to write.
+    There is a lack of documentation on this column type.
     - Reading a datatable structure is not supported.
