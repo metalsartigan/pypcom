@@ -298,16 +298,16 @@ class DatatableStructure:
             column_count = len(self._columns) - start_column_index
 
         reply_rows = self._split_reply_into_raw_rows(reply, start_column_index, column_count)
-        return [self._parse_result_row(row) for row in reply_rows]
+        return [self._parse_result_row(row, start_column_index, column_count) for row in reply_rows]
 
     def _split_reply_into_raw_rows(self, reply, start_column_index, column_count):
         row_size = self.get_row_size(start_column_index, column_count)
         return _chunks(reply, row_size)
 
-    def _parse_result_row(self, raw_row):
+    def _parse_result_row(self, raw_row, start_column_index, column_count):
         row_queue = deque(raw_row)
         row = []
-        for column in self._columns:
+        for column in self._columns[start_column_index:start_column_index + column_count]:
             column_data = [row_queue.popleft() for _ in range(column.size)]
             column_value = column.parse_value(column_data)
             row.append(column_value)

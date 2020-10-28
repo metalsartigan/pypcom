@@ -416,4 +416,17 @@ class TestStructure(BaseTest):
         with self.assertRaises(ValueError):
             self._structure.get_row_data_for_details(row, start_column_index=len(row))
 
+    def test_parse_reply_partial_row(self):
+        columns = [
+            datatables.Byte(),
+            datatables.String(5),
+            datatables.Timer(),
+            datatables.Bool(9),
+        ]
+        structure = datatables.DatatableStructure("Some table", offset=44, rows=22, columns=columns)
+        reply = bytearray(b'\x00\x00\xffP%\x02\x00\x00\x00\x00\x00\x00')
+        expected = [[[[0, 0, 255, 80, 37, 2, 0, 0, 0, 0, 0, 0]]]]
 
+        actual = structure.parse_reply(reply, start_column_index=2, column_count=1)
+
+        self.assertListEqual(expected, actual)
