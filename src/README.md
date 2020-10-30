@@ -81,7 +81,4 @@ with EthernetPlc(address=('192.168.5.47', 1616)) as plc:
     - Serial communication is not implemented yet.
 - Datatables:
     - "Part of project" columns are not supported.
-    - Timer columns are treated as raw data. A read command will return the
-    data as returned from the PLC, and a list of 12 bytes is required to write.
-    There is a lack of documentation on this column type.
     - Reading a datatable structure is not supported.
