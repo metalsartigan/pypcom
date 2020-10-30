@@ -1,5 +1,6 @@
 from .base_test import BaseTest
 
+from datetime import timedelta
 from pcom.commands import datatables
 
 
@@ -140,13 +141,19 @@ class TestStructure(BaseTest):
         self.assertAlmostEqual(76543.21, actual[1], places=2)
 
     def test_timer_parse_value(self):
-        col = datatables.Timer(2)
-        expected = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]]
-        buffer = expected[0] + expected[1]
+        col = datatables.Timer(3)
+        buffer = [
+            0, 0, 255, 80, 37, 2, 0, 0, 0, 0, 0, 0,  # max value
+            0, 0, 64, 49, 247, 0, 0, 0, 0, 0, 0, 0,  # middle value
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0       # 0 value
+        ]
+        expected = [
+            timedelta(hours=99, minutes=59, seconds=59, milliseconds=990),
+            timedelta(hours=45),
+            timedelta()
+        ]
 
         self.assertListEqual(expected, col.parse_value(buffer))
-        self.skipTest("Lacking documentation on this. It's not supported yet.")
-        # https://forum.unitronics.com/topic/7631-how-to-read-a-timer-column-in-a-datatable/
 
     def test_bool_get_data_for_details_single(self):
         col = datatables.Bool()
@@ -213,10 +220,18 @@ class TestStructure(BaseTest):
 
     def test_timer_get_data_for_details(self):
         col = datatables.Timer(2)
-        self.assertListEqual([1, 2, 3, 4, 5, 6, 7, 8], col.get_data_for_details([[1, 2, 3, 4], [5, 6, 7, 8]]))
+        expected = [
+            0, 0, 255, 80, 37, 2, 0, 0, 0, 0, 0, 0,  # max value
+            0, 0, 64, 49, 247, 0, 0, 0, 0, 0, 0, 0,  # middle value
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # 0 value
+        ]
+        details = [
+            timedelta(hours=99, minutes=59, seconds=59, milliseconds=990),
+            timedelta(hours=45),
+            timedelta()
+        ]
 
-        self.skipTest("Not implemented yet")
-        # https://forum.unitronics.com/topic/7631-how-to-read-a-timer-column-in-a-datatable/
+        self.assertListEqual(expected, col.get_data_for_details(details))
 
     def test_validate_values_bool(self):
         datatables.Bool().validate_values([True])
@@ -330,24 +345,18 @@ class TestStructure(BaseTest):
             datatables.Float(2).validate_values([1, False])
 
     def test_validate_values_timer(self):
-        datatables.Timer().validate_values([[1, 2, 3, 4] * 3])
-        datatables.Timer(2).validate_values([[1, 2, 3, 4] * 3, [5, 6, 7, 8] * 3])
+        datatables.Timer().validate_values([timedelta()])
+        datatables.Timer(2).validate_values([timedelta()] * 2)
+        datatables.Timer().validate_values([timedelta(hours=99, minutes=59, seconds=59, milliseconds=990)])
 
         with self.assertRaises(ValueError, msg="Too many values"):
-            datatables.Timer().validate_values([[1, 2, 3, 4] * 3, [5, 6, 7, 8] * 3])
+            datatables.Timer().validate_values([timedelta()] * 2)
         with self.assertRaises(ValueError, msg="Not enough values"):
-            datatables.Timer(2).validate_values([[1, 2, 3, 4] * 3])
+            datatables.Timer(2).validate_values([timedelta()])
         with self.assertRaises(ValueError, msg="Type mismatch"):
-            datatables.Timer(2).validate_values([[1, 2, 3, 4] * 3, False])
-        with self.assertRaises(ValueError, msg="Missing int"):
-            datatables.Timer().validate_values([[1, 2, 3]])
-        with self.assertRaises(ValueError, msg="Extra int"):
-            datatables.Timer().validate_values([[1, 2, 3, 4, 5] * 3])
-        with self.assertRaises(ValueError, msg="Wrong type"):
-            datatables.Timer().validate_values([[1, 2, 3, False] * 3])
-
-        self.skipTest("Lacking documentation on this. It's not supported yet.")
-        # https://forum.unitronics.com/topic/7631-how-to-read-a-timer-column-in-a-datatable/
+            datatables.Timer(2).validate_values([timedelta(), False])
+        with self.assertRaises(ValueError, msg="Value too high"):
+            datatables.Timer().validate_values([timedelta(hours=99, minutes=59, seconds=59, milliseconds=991)])
 
     def test_datatable_structure_validate_row_values(self):
         row = [[12], "abcde", [12345678], [True] * 9, [False], [True], [1024, 2048], [1]]
@@ -425,7 +434,7 @@ class TestStructure(BaseTest):
         ]
         structure = datatables.DatatableStructure("Some table", offset=44, rows=22, columns=columns)
         reply = bytearray(b'\x00\x00\xffP%\x02\x00\x00\x00\x00\x00\x00')
-        expected = [[[[0, 0, 255, 80, 37, 2, 0, 0, 0, 0, 0, 0]]]]
+        expected = [[[timedelta(hours=99, minutes=59, seconds=59, milliseconds=990)]]]
 
         actual = structure.parse_reply(reply, start_column_index=2, column_count=1)
 

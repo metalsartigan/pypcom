@@ -2,6 +2,7 @@ import abc
 import struct
 
 from collections import deque
+from datetime import timedelta
 from typing import Any, List
 
 
@@ -213,26 +214,33 @@ class Float(DataType):
 
 
 class Timer(DataType):
+    # https://forum.unitronics.com/topic/7631-how-to-read-a-timer-column-in-a-datatable/
     def __init__(self, number_of_elements: int = 1):
         super().__init__(number_of_elements * 12)
 
     def parse_value(self, data: List[int]):
-        # There is no documentation on this type of column.
-        # https://forum.unitronics.com/topic/7631-how-to-read-a-timer-column-in-a-datatable/
-        return _chunks(data, 12)
+        chunks = [c[2:-6] for c in _chunks(data, 12)]
+        numeric_values = [struct.unpack('<i', bytes(c))[0] for c in chunks]
+        return [timedelta(milliseconds=n * 10) for n in numeric_values]
 
-    def get_data_for_details(self, values: List[int]):
-        return [n for v in values for n in v]
+    def get_data_for_details(self, values: List[timedelta]):
+        details = [int(delta / timedelta(milliseconds=10)) for delta in values]
+        data = []
+        for detail in details:
+            data.extend([0] * 2)  # unused bytes
+            data.extend(self._get_data_for_details('<i', [detail]))
+            data.extend([0] * 6)  # unused bytes
+        return data
 
-    def validate_values(self, values: List[int]):
-        if any(type(v) is not list for v in values):
-            raise ValueError("Values for Timer column must be lists of twelve integers. Values: %s" % values)
-        for v in values:
-            if any(type(n) is not int for n in v) or len(v) != 12:
-                raise ValueError("Timer values should be four integers")
+    def validate_values(self, values: List[timedelta]):
+        if any(type(v) is not timedelta for v in values):
+            raise ValueError("Values for Timer column must be timedelta. Values: %s" % values)
+        if any(v > timedelta(hours=99, minutes=59, seconds=59, milliseconds=990) for v in values):
+            raise ValueError(
+                "Values of timedelta for Timer column must not exceed 99 hours, 59 minutes, 59 seconds and 990 milliseconds. Values: %s" % values)
         if len(values) != self._size / 12:
             raise ValueError(
-                "Values for Timer do not match its structure. Column size: %d, values: %s" % (self._size / 12, values))
+                "Values for Timer do not match its structure. Column size: %d, values: %s" % (self._size, values))
 
 
 class DatatableStructure:
@@ -320,7 +328,8 @@ class DatatableStructure:
         if actual == 0:
             raise ValueError("Row has no value, expected %d." % expected)
         if actual > expected:
-            raise ValueError("The number of values in row exceeds what is expected. Expected %d, got %d." % (actual, expected))
+            raise ValueError(
+                "The number of values in row exceeds what is expected. Expected %d, got %d." % (actual, expected))
         for i, column_values in enumerate(row_values):
             self._columns[start_column_index + i].validate_values(column_values)
 
