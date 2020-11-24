@@ -22,14 +22,14 @@ class TestWriteDatatable(BaseTest):
 
     def test_parse_reply(self):
         structure = datatables.DatatableStructure("Test", offset=0, rows=500, columns=[datatables.Bool()])
-        command = datatables.WriteDatatable(structure=structure)
+        command = datatables.WriteDatatable(structure=structure, data=[[[True]]])
         raw_reply = bytearray(b'/_OPLC\xfe\x00\x01\x00\x00\x00\xc4d\xe8N\x00\x00\x00\x00\x00\x00\xe7\xfa\x00\x00\\')
 
         actual = command.parse_reply(raw_reply)
 
         self.assertIsNone(actual)
 
-    def test_parse_reply(self):
+    def test_parse_reply_error(self):
         from pcom.commands.datatables.write_datatable import DatatableCommand
         with patch.object(DatatableCommand, 'parse_reply', return_value=bytearray(b'\x01')):
             with self.assertRaises(datatables.WriteDatatableError):
