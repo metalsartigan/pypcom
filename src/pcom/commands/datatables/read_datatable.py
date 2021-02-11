@@ -19,7 +19,8 @@ class ReadDatatable(DatatableCommand):
     def _get_command_details(self):
         data_size = self._table_structure.get_row_size(self._start_column_index, self._column_count)
         details = self._to_little_endian(data_size)
-        details.extend(self._to_little_endian(self._row_count))
+        row_count = self._table_structure.get_row_count(self._start_row_index, self._row_count)
+        details.extend(self._to_little_endian(row_count))
         row_size = self._table_structure.get_row_size()
         details.extend(self._to_long_little_endian(row_size))
         details.extend([0] * 24)

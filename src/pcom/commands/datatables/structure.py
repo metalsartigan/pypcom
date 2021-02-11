@@ -293,6 +293,26 @@ class DatatableStructure:
 
         return sum(c.size for c in self._columns[start_column_index:start_column_index + column_count])
 
+    def get_row_count(self, start_row_index: int, row_count: int):
+        """Computes the number of rows.
+
+        :param start_row_index: The first row.
+        :param row_count: The number of rows. 0 will include all remaining rows.
+        :return: An integer representing the number of rows that can be read.
+        """
+        if start_row_index < 0:
+            raise ValueError("Invalid start_index: %d" % start_row_index)
+        if row_count < 0:
+            raise ValueError("Invalid count: %d" % row_count)
+
+        if start_row_index + row_count > self._rows or start_row_index == self._rows:
+            msg = "start_index and count exceed the number of rows: %d, %d" % (start_row_index, row_count)
+            raise ValueError(msg)
+        if row_count == 0:
+            row_count = self._rows - start_row_index
+
+        return row_count
+
     def parse_reply(self, reply: List[int], start_column_index: int, column_count: int):
         if column_count == 0:
             column_count = len(self._columns) - start_column_index

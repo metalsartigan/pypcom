@@ -72,6 +72,22 @@ class TestStructure(BaseTest):
         with self.assertRaises(ValueError):
             self._structure.get_row_size(0, -1)
 
+    def test_get_row_count(self):
+        self.assertEqual(2, self._structure.get_row_count(0, 2), msg="(0, 2)")
+        self.assertEqual(2, self._structure.get_row_count(1, 2), msg="(1, 2)")
+        self.assertEqual(22, self._structure.get_row_count(0, 22), msg="(0, 22)")
+        self.assertEqual(22, self._structure.get_row_count(0, 0), msg="(0, 0)")
+        self.assertEqual(20, self._structure.get_row_count(2, 0), msg="(2, 0)")
+        self.assertEqual(10, self._structure.get_row_count(2, 10), msg="(2, 10)")
+        with self.assertRaises(ValueError):
+            self._structure.get_row_count(-1, 0)
+        with self.assertRaises(ValueError, msg="Cannot get count for more rows"):
+            self._structure.get_row_count(0, 23)
+        with self.assertRaises(ValueError, msg="Cannot get count starting after last row"):
+            self._structure.get_row_count(22, 0)
+        with self.assertRaises(ValueError):
+            self._structure.get_row_count(0, -1)
+
     def test_bool_parse_value_single(self):
         col = datatables.Bool()
         self.assertListEqual([False], col.parse_value([0x00]))
