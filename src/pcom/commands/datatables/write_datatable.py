@@ -12,6 +12,9 @@ class WriteDatatable(DatatableCommand):
         column_count = len(self._data[0])
         super().__init__(68, structure, start_row_index, row_count, start_column_index, column_count, plc_id)
 
+    @property
+    def data(self): return list(self._data)
+
     def _get_command_details(self):
         data_size = self._table_structure.get_row_size(self._start_column_index, self._column_count)
         details = self._to_little_endian(data_size)

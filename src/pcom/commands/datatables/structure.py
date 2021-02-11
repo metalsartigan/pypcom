@@ -18,8 +18,7 @@ class DataType(abc.ABC):
         self._size = size
 
     @property
-    def size(self):
-        return self._size
+    def size(self): return self._size
 
     @abc.abstractmethod
     def parse_value(self, data: List[int]):  # pragma: nocover
@@ -251,20 +250,13 @@ class DatatableStructure:
         self._rows = rows
 
     @property
-    def name(self):
-        return self._name
-
+    def name(self): return self._name
     @property
-    def offset(self):
-        return self._offset
-
+    def offset(self): return self._offset
     @property
-    def columns(self):
-        return list(self._columns)
-
+    def columns(self): return list(self._columns)
     @property
-    def rows(self):
-        return self._rows
+    def rows(self): return self._rows
 
     def get_cell_offset(self, row_index: int, column_index: int):
         """Computes the absolute offset of a specific position.

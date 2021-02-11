@@ -14,6 +14,17 @@ class DatatableCommand(BinaryCommand, ABC):
         self._start_column_index = start_column_index
         self._column_count = column_count
 
+    @property
+    def table_structure(self): return self._table_structure
+    @property
+    def start_row_index(self): return self._start_row_index
+    @property
+    def row_count(self): return self._row_count
+    @property
+    def start_column_index(self): return self._start_row_index
+    @property
+    def column_count(self): return self._column_count
+
     def _get_command_args(self):
         offset = self._table_structure.get_cell_offset(self._start_row_index, self._start_column_index)
         args = self._to_long_little_endian(offset)

@@ -9,6 +9,9 @@ class ReadOperands(BinaryCommand):
         self._requests = []
         super().__init__(command_number=77, plc_id=plc_id)
 
+    @property
+    def requests(self): return list(self._requests)
+
     def add_request(self, request: OperandRequest):
         self._requests.append(request)
 

@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='pcom',
-    version='0.3',
+    version='0.4',
     packages=setuptools.find_packages(),
     url='',
     license='MIT License',
