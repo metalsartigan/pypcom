@@ -10,11 +10,19 @@ from tests.pcom.commands.mock_ascii_command import MockAsciiCommand
 class TestEthernetCommandWrapper(TestCase):
     def setUp(self):
         with patch.object(EthernetCommandWrapper, '_create_command_id', return_value=[31, 104]):
-            self.wrapper = EthernetCommandWrapper(MockAsciiCommand())
+            self.base_command = MockAsciiCommand()
+            self.wrapper = EthernetCommandWrapper(self.base_command)
         super().setUp()
 
     def test_get_bytes(self):
         expected = bytearray(b'\x1fhe\x00\x04\x00\x01\x02\x03\x04')
+        actual = self.wrapper.get_bytes()
+        self.assertEqual(expected, actual)
+
+    def test_get_bytes_big_command(self):
+        expected = bytearray(b'\x1fhe\x00X\x02')
+        expected.extend([1] * 600)
+        self.base_command.set_bytes([1] * 600)
         actual = self.wrapper.get_bytes()
         self.assertEqual(expected, actual)
 

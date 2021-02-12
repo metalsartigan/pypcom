@@ -22,8 +22,13 @@ class EthernetCommandWrapper(BaseCommand):
     def __get_header(self):
         base_command_bytes = self.base_command.get_bytes()
         header = list(self.command_id)
-        header.extend([self.base_command.protocol, 0, len(base_command_bytes), 0])
+        header.extend([self.base_command.protocol, 0])
+        command_size = self._to_little_endian(len(base_command_bytes))
+        header.extend(command_size)
         return bytearray(header)
+
+    def _to_little_endian(self, word):
+        return [word & 255, word >> 8]
 
     def parse_reply(self, buffer: bytearray):
         super().parse_reply(buffer)
