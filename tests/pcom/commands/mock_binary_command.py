@@ -22,3 +22,9 @@ class MockBinaryCommand(BinaryCommand):
 
     def get_recv_bytes(self):
         return bytearray(b'\x02\x03\x04')
+
+    def to_little_endian(self, word):
+        return super()._to_little_endian(word)
+
+    def to_long_little_endian(self, word):
+        return super()._to_long_little_endian(word)

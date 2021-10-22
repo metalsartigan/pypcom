@@ -31,10 +31,10 @@ class BinaryCommand(BaseCommand, ABC):
         return footer
 
     def _to_little_endian(self, word):
-        return [word & 255, word >> 8]
+        return [word & 255, (word >> 8) & 255]
 
     def _to_long_little_endian(self, word):
-        return [word & 255, word >> 8, word >> 16, word >> 32]
+        return [word & 255, (word >> 8) & 255, (word >> 16) & 255, (word >> 24) & 255]
 
     def _get_crc_bytes(self, data):
         val = ~(sum(data) % 0x10000) + 1
