@@ -12,12 +12,12 @@ class TestBasePlc(TestCase):
         self._plc = MockPlc()
 
     def test_context_mgmt(self):
-        self._plc._connect = MagicMock(side_effect=self._plc._connect)
-        self._plc._close = MagicMock(side_effect=self._plc._close)
+        self._plc.connect = MagicMock(wraps=self._plc.connect)
+        self._plc.close = MagicMock(wraps=self._plc.close)
         with self._plc:
-            self._plc._connect.assert_called_once()
-            self._plc._close.assert_not_called()
-        self._plc._close.assert_called_once()
+            self._plc.connect.assert_called_once()
+            self._plc.close.assert_not_called()
+        self._plc.close.assert_called_once()
 
     @patch.object(MockPlc, '_send_bytes')
     @patch.object(MockPlc, '_receive_bytes')

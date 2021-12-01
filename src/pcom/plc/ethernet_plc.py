@@ -16,7 +16,7 @@ class EthernetPlc(BasePlc):
         self._socket = None
         self._buffer = bytearray()
 
-    def _connect(self):
+    def connect(self):
         self._socket = socket.socket()
         self._socket.settimeout(self._timeout)
         try:
@@ -29,11 +29,15 @@ class EthernetPlc(BasePlc):
             else:
                 raise
 
-    def _close(self):
+    def close(self):
+        self._buffer.clear()
         if self._socket:
             self._socket.close()
+            self._socket = None
 
     def send(self, command: BaseCommand):
+        if not self._socket:
+            raise PComError("Cannot send while not connected.")
         command = EthernetCommandWrapper(command)
         return super().send(command)
 

@@ -1,13 +1,29 @@
+import sys
+
 from pcom import commands
 from pcom.plc import EthernetPlc
 from datetime import timedelta
 
 
-with EthernetPlc(address=('192.168.5.47', 1616)) as plc:
-    # c = commands.SetBits(code=commands.SetBits.MEMORY, address=300, values=values)
-    # c = commands.SetRtc(value=datetime.now())
-    # c = commands.SetRtc(value=datetime(2018, 12, 13, 14, 43, 10))
+with EthernetPlc(address=('192.168.5.79', 20256)) as plc:
     if True:
+        cols = [
+            commands.datatables.Int(),  # Quantity
+            commands.datatables.Long(),  # Length
+            commands.datatables.Int(),  # length table #
+            commands.datatables.Int(),  # width table #
+        ]
+        struct = commands.datatables.DatatableStructure("Recipe", offset=9760, rows=60,
+                                                                              columns=cols)
+
+        data = [[[2], [10333], [0], [0]], [[4], [12777], [1], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]], [[0], [0], [0], [0]]]
+        cmd = commands.datatables.WriteDatatable(structure=struct, data=data)
+        plc.send(cmd)
+
+        # c = commands.SetBits(code=commands.SetBits.MEMORY, address=300, values=values)
+        # c = commands.SetRtc(value=datetime.now())
+        # c = commands.SetRtc(value=datetime(2018, 12, 13, 14, 43, 10))
+    if False:
         test_structure = commands.datatables.DatatableStructure("Test", offset=20200, rows=2, columns=[
             commands.datatables.String(5),
             commands.datatables.Float(),

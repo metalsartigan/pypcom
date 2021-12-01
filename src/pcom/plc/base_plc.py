@@ -7,14 +7,14 @@ from pcom.errors import PComError
 class BasePlc(ABC):
     def __enter__(self):
         try:
-            self._connect()
+            self.connect()
         except Exception:
-            self._close()
+            self.close()
             raise
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._close()
+        self.close()
 
     def send(self, command: BaseCommand):
         send_buffer = command.get_bytes()
@@ -32,8 +32,8 @@ class BasePlc(ABC):
     def _receive_bytes(self):  # pragma: nocover
         pass
 
-    def _connect(self):
+    def connect(self):
         pass
 
-    def _close(self):
+    def close(self):
         pass

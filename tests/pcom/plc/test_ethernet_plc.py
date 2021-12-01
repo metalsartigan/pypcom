@@ -43,6 +43,10 @@ class TestEthernetPlc(TestCase):
 
         self.assertEqual(expected, actual)
 
+    def test_send_not_connected(self, *args):
+        with self.assertRaisesRegex(PComError, "not connected"):
+            self._plc.send(MockAsciiCommand())
+
     def test_connect_timeout_os_timeout(self, mock_connect, mock_close):
         side_effect = TimeoutError(os.strerror(errno.ETIMEDOUT))
         self._assert_connection_error(mock_connect, mock_close, side_effect, "Connection timed out")
