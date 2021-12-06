@@ -21,7 +21,9 @@ class DatatableCommand(BinaryCommand, ABC):
     @property
     def row_count(self): return self._row_count
     @property
-    def start_column_index(self): return self._start_row_index
+    def start_column_index(self) -> int:
+        return self._start_column_index
+
     @property
     def column_count(self): return self._column_count
 
