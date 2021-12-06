@@ -208,8 +208,8 @@ class Float(DataType):
         if len(values) != self._size / 4:
             raise ValueError(
                 "Values for Float do not match its structure. Column size: %d, values: %s" % (self._size / 4, values))
-        if not all(-3.4e+38 <= v <= 3.4e+38 for v in values):
-            raise ValueError("Float values must be between 1.18e-38 and 3.4e+38.")
+        if not all(-1.18e+38 <= v <= 3.4e+38 for v in values):
+            raise ValueError("Float values must be between -1.18e+38 and 3.4e+38.")
 
 
 class Timer(DataType):
