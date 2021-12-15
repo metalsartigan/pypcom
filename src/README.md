@@ -105,6 +105,8 @@ with EthernetPlc(address=('192.168.5.47', 1616)) as plc:
 
 
 ### Changelog  ###
+#### Version 0.9.1 ####
+- Add support for WriteIntegers and WriteFloats commands
 #### Version 0.8 ####
 - Start of changelog
 - BREAKING: Methods _connect() and _close() have been renamed to connect() and close().
