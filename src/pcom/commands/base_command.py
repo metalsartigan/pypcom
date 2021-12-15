@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 PROTOCOL_ASCII = 101
 PROTOCOL_BINARY = 102
@@ -10,13 +11,13 @@ class BaseCommand(ABC):
         self.protocol = protocol
 
     @abstractmethod
-    def get_bytes(self):  # pragma: nocover
+    def get_bytes(self) -> bytearray:  # pragma: nocover
         pass
 
-    def parse_reply(self, buffer: bytearray):
+    def parse_reply(self, buffer: bytearray) -> bytearray:
         self._validate_reply(buffer)
         return buffer
 
     @abstractmethod
-    def _validate_reply(self, buffer: bytearray):  # pragma: nocover
+    def _validate_reply(self, buffer: bytearray) -> None:  # pragma: nocover
         pass

@@ -3,11 +3,11 @@ from pcom.plc.base_plc import BasePlc
 
 
 class SerialPlc(BasePlc):
-    def _send_bytes(self, buffer: bytearray):
+    def _send_bytes(self, buffer: bytearray) -> None:
         raise NotImplementedError()
 
-    def _receive_bytes(self):
+    def _receive_bytes(self) -> None:
         raise NotImplementedError()
 
-    def send(self, command: BaseCommand):
+    def send(self, command: BaseCommand) -> bytearray:
         raise NotImplementedError()

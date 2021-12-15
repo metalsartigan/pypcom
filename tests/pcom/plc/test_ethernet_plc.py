@@ -19,10 +19,16 @@ class TestEthernetPlc(TestCase):
         self._address = ('127.0.0.1', 1616)
         self._plc = EthernetPlc(address=self._address, timeout=10)
 
+    def test_properties(self, *args):
+        self.assertEqual(self._address, self._plc.address)
+
     def test_connect(self, mock_connect, mock_close, *args):
+        self.assertFalse(self._plc.is_connected)
         with self._plc:
             mock_connect.assert_called_once_with(self._address)
             mock_close.assert_not_called()
+            self.assertTrue(self._plc.is_connected)
+        self.assertFalse(self._plc.is_connected)
         mock_close.assert_called_once()
 
     @patch.object(EthernetCommandWrapper, '_create_command_id', return_value=[31, 104])
@@ -64,6 +70,7 @@ class TestEthernetPlc(TestCase):
         with self.assertRaisesRegex(error_class, message):
             with self._plc:
                 pass
+        self.assertFalse(self._plc.is_connected)
         mock_close.assert_called_once()
 
     def test_connect_no_route_to_host(self, mock_connect, mock_close):

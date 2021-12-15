@@ -1,7 +1,9 @@
-from abc import ABC, abstractmethod
-from collections import deque
 import math
 import struct
+
+from abc import ABC, abstractmethod
+from collections import deque
+from typing import List, Any
 
 
 class OperandRequest(ABC):
@@ -10,13 +12,13 @@ class OperandRequest(ABC):
         self.sequence = sequence
         self.addresses = addresses
         self.length = length
-        self.values = []
+        self.values: List[Any] = []
 
     @abstractmethod
-    def pop_values(self, buffer: deque):  # pragma: nocover
+    def pop_values(self, buffer: deque) -> None:  # pragma: nocover
         pass
 
-    def _get_values_count(self):
+    def _get_values_count(self) -> int:
         return max(len(self.addresses), self.length)
 
 
@@ -24,13 +26,13 @@ class OneBitRequest(OperandRequest):
     def __init__(self, **kwargs):
         super().__init__(sequence=1, **kwargs)
 
-    def pop_values(self, buffer: deque):
+    def pop_values(self, buffer: deque) -> None:
         for __ in range(self._get_values_count()):
             value = buffer.popleft()
             self.values.append(value)
 
     @classmethod
-    def parse_binary_values(cls, instances: list, buffer: deque):
+    def parse_binary_values(cls, instances: list, buffer: deque) -> List[bool]:
         count = sum(r._get_values_count() for r in instances)
         int_count = math.ceil(count / 16.0)
         bits = []
@@ -46,7 +48,7 @@ class SixteenBitsRequest(OperandRequest):
     def __init__(self, **kwargs):
         super().__init__(sequence=2, **kwargs)
 
-    def pop_values(self, buffer: deque):
+    def pop_values(self, buffer: deque) -> None:
         for _ in range(self._get_values_count()):
             byte1 = buffer.popleft()
             byte2 = buffer.popleft()
@@ -58,7 +60,7 @@ class ThirtytwoBitsRequest(OperandRequest):
     def __init__(self, **kwargs):
         super().__init__(sequence=3, **kwargs)
 
-    def pop_values(self, buffer: deque):
+    def pop_values(self, buffer: deque) -> None:
         for _ in range(self._get_values_count()):
             bytes = bytearray()
             bytes.append(buffer.popleft())
@@ -68,12 +70,12 @@ class ThirtytwoBitsRequest(OperandRequest):
             value = self._convert_bytes(bytes)
             self.values.append(value)
 
-    def _convert_bytes(self, bytes: bytearray):
+    def _convert_bytes(self, bytes: bytearray) -> int:
         return bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24)
 
 
 class FloatRequest(ThirtytwoBitsRequest):
-    def _convert_bytes(self, bytes: bytearray):
+    def _convert_bytes(self, bytes: bytearray) -> float:
         ieee754 = bytes[2:4] + bytes[:2]
         return struct.unpack('f', ieee754)[0]
 

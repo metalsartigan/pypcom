@@ -13,6 +13,9 @@ class TestWriteDatatable(BaseTest):
         self._command = datatables.WriteDatatable(structure=self._structure, start_row_index=3, start_column_index=1,
                                                   data=self._data)
 
+    def test_property(self):
+        self.assertListEqual(self._data, self._command.data)
+
     def test_get_bytes_specific(self):
         expected = bytearray(b'/_OPLC\x00\xfe\x01\x00\x00\x00D\x00f\x00\x00\x00\x00\x00D\x00W\xfc\x12\x00\x02\x00\x13\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00abcde@\x9c\x00\x00\xff\x01\x00\x01\xc8\x00,\x01\x0bfgh  P\xc3\x00\x00\xff\x01\x01\x00d\x002\x00\x0c\xe2\xf6\\')
 

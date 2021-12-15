@@ -9,6 +9,10 @@ class TestReadOperands(TestCase):
         super().setUp()
         self._command = ReadOperands(plc_id=0)
 
+    def test_property(self):
+        self._init_example_2()
+        self.assertEqual(3, len(self._command.requests))
+
     def test_request_codes(self):
         self.assertEqual(0x01, operand_request.MB(addresses=[]).code)
         self.assertEqual(0x02, operand_request.SB(addresses=[]).code)

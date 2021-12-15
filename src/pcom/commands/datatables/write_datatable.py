@@ -1,3 +1,4 @@
+from typing import List
 from .datatable_command import DatatableCommand
 from .structure import DatatableStructure
 
@@ -13,9 +14,10 @@ class WriteDatatable(DatatableCommand):
         super().__init__(68, structure, start_row_index, row_count, start_column_index, column_count, plc_id)
 
     @property
-    def data(self): return list(self._data)
+    def data(self) -> List[list]:
+        return list(self._data)
 
-    def _get_command_details(self):
+    def _get_command_details(self) -> List[int]:
         data_size = self._table_structure.get_row_size(self._start_column_index, self._column_count)
         details = self._to_little_endian(data_size)
         details.extend(self._to_little_endian(self._row_count))
@@ -27,7 +29,7 @@ class WriteDatatable(DatatableCommand):
                 self._table_structure.get_row_data_for_details(row, start_column_index=self._start_column_index))
         return details
 
-    def _validate_data(self, structure, data, start_column_index):
+    def _validate_data(self, structure, data, start_column_index) -> None:
         struct_error_msg = "Data should be a list of lists or values which represents a list of rows with values to be written."
         if type(data) is not list:
             raise ValueError(struct_error_msg)
@@ -38,7 +40,7 @@ class WriteDatatable(DatatableCommand):
         for row in data:
             structure.validate_row_values(row, start_column_index=start_column_index)
 
-    def parse_reply(self, buffer: bytearray):
+    def parse_reply(self, buffer: bytearray) -> None:
         reply = super().parse_reply(buffer)
         if len(reply) != 0:
             raise WriteDatatableError(self._table_structure.name, self._data, reply)

@@ -3,6 +3,16 @@ from pcom.commands import datatables
 
 
 class TestReadDatatable(BaseTest):
+    def test_properties(self):
+        command = datatables.ReadDatatable(structure=self._structure, start_row_index=3, row_count=10,
+                                           start_column_index=1, column_count=2)
+
+        self.assertEqual(self._structure, command.table_structure)
+        self.assertEqual(3, command.start_row_index)
+        self.assertEqual(10, command.row_count)
+        self.assertEqual(1, command.start_column_index)
+        self.assertEqual(2, command.column_count)
+
     def test_get_bytes_specific(self):
         command = datatables.ReadDatatable(structure=self._structure, start_row_index=3, row_count=10,
                                            start_column_index=1, column_count=2)

@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from .datatable_command import DatatableCommand
 from .structure import DatatableStructure
 
@@ -16,7 +18,7 @@ class ReadDatatable(DatatableCommand):
         """
         super().__init__(4, structure, start_row_index, row_count, start_column_index, column_count, plc_id)
 
-    def _get_command_details(self):
+    def _get_command_details(self) -> List[int]:
         data_size = self._table_structure.get_row_size(self._start_column_index, self._column_count)
         details = self._to_little_endian(data_size)
         row_count = self._table_structure.get_row_count(self._start_row_index, self._row_count)
@@ -26,6 +28,6 @@ class ReadDatatable(DatatableCommand):
         details.extend([0] * 24)
         return details
 
-    def parse_reply(self, buffer: bytearray):
+    def parse_reply(self, buffer: bytearray) -> List[List[Any]]:
         reply = super().parse_reply(buffer)
         return self._table_structure.parse_reply(reply, self._start_column_index, self._column_count)

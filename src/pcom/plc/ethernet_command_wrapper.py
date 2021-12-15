@@ -2,6 +2,7 @@ import random
 
 from pcom.commands.base_command import BaseCommand
 from pcom.errors import PComError
+from typing import List
 
 
 class EthernetCommandWrapper(BaseCommand):
@@ -10,16 +11,16 @@ class EthernetCommandWrapper(BaseCommand):
         self.base_command = base_command
         self.command_id = self._create_command_id()
 
-    def _create_command_id(self):
+    def _create_command_id(self) -> List[int]:
         return [random.randint(0, 99), random.randint(0, 99)]
 
-    def get_bytes(self):
+    def get_bytes(self) -> bytearray:
         frame = self.__get_header()
         base_command_bytes = self.base_command.get_bytes()
         frame.extend(base_command_bytes)
         return frame
 
-    def __get_header(self):
+    def __get_header(self) -> bytearray:
         base_command_bytes = self.base_command.get_bytes()
         header = list(self.command_id)
         header.extend([self.base_command.protocol, 0])
@@ -27,15 +28,15 @@ class EthernetCommandWrapper(BaseCommand):
         header.extend(command_size)
         return bytearray(header)
 
-    def _to_little_endian(self, word):
+    def _to_little_endian(self, word) -> List[int]:
         return [word & 255, word >> 8]
 
-    def parse_reply(self, buffer: bytearray):
+    def parse_reply(self, buffer: bytearray) -> bytearray:
         super().parse_reply(buffer)
         command_buffer = buffer[6:]
         return self.base_command.parse_reply(command_buffer)
 
-    def _validate_reply(self, buffer: bytearray):
+    def _validate_reply(self, buffer: bytearray) -> None:
         header = buffer[:6]
         header_bytes = self.__get_header()
         expected = header_bytes[:4]

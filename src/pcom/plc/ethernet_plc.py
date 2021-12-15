@@ -1,6 +1,7 @@
 import errno
 import os
 import socket
+from typing import Tuple, Any
 
 from pcom.commands.base_command import BaseCommand, PROTOCOL_ASCII, PROTOCOL_BINARY
 from pcom.errors import PComError
@@ -9,14 +10,22 @@ from pcom.plc.ethernet_command_wrapper import EthernetCommandWrapper
 
 
 class EthernetPlc(BasePlc):
-    def __init__(self, *, address: tuple, timeout: int = 5):
+    def __init__(self, *, address: Tuple[str, int], timeout: int = 5):
         super().__init__()
         self._address = address
         self._timeout = timeout
-        self._socket = None
+        self._socket: socket.socket or None = None
         self._buffer = bytearray()
 
-    def connect(self):
+    @property
+    def is_connected(self) -> bool:
+        return bool(self._socket)
+
+    @property
+    def address(self) -> Tuple[str, int]:
+        return self._address
+
+    def connect(self) -> None:
         self._socket = socket.socket()
         self._socket.settimeout(self._timeout)
         try:
@@ -29,25 +38,25 @@ class EthernetPlc(BasePlc):
             else:
                 raise
 
-    def close(self):
+    def close(self) -> None:
         self._buffer.clear()
         if self._socket:
             self._socket.close()
             self._socket = None
 
-    def send(self, command: BaseCommand):
+    def send(self, command: BaseCommand) -> Any:
         if not self._socket:
             raise PComError("Cannot send while not connected.")
         command = EthernetCommandWrapper(command)
         return super().send(command)
 
-    def _send_bytes(self, buffer: bytearray):  # pragma: nocover
+    def _send_bytes(self, buffer: bytearray) -> None:  # pragma: nocover
         self._socket.send(buffer)
 
-    def _socket_recv(self):  # pragma: nocover
+    def _socket_recv(self) -> bytearray:  # pragma: nocover
         return self._socket.recv(4096)
 
-    def _receive_bytes(self):
+    def _receive_bytes(self) -> bytearray:
         try:
             header = None
             while True:

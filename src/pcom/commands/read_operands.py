@@ -1,4 +1,5 @@
 from collections import deque
+from typing import List
 
 from .operand_request import OperandRequest, OneBitRequest
 from .binary_command import BinaryCommand
@@ -6,21 +7,22 @@ from .binary_command import BinaryCommand
 
 class ReadOperands(BinaryCommand):
     def __init__(self, *, plc_id: int = 0):
-        self._requests = []
+        self._requests: List[OperandRequest] = []
         super().__init__(command_number=77, plc_id=plc_id)
 
     @property
-    def requests(self): return list(self._requests)
+    def requests(self) -> List[OperandRequest]:
+        return list(self._requests)
 
-    def add_request(self, request: OperandRequest):
+    def add_request(self, request: OperandRequest) -> None:
         self._requests.append(request)
 
-    def _get_command_args(self):
+    def _get_command_args(self) -> List[int]:
         command_args = [0x0, 0x0, 0x0, 0x0]
         command_args += self._to_little_endian(len(self._requests))
         return command_args
 
-    def _get_command_details(self):
+    def _get_command_details(self) -> List[int]:
         details = []
         self._requests.sort(key=lambda r: r.sequence)
         for request in self._requests:
@@ -38,20 +40,20 @@ class ReadOperands(BinaryCommand):
             details += frame
         return details
 
-    def parse_reply(self, buffer: bytearray):
+    def parse_reply(self, buffer: bytearray) -> List[OperandRequest]:
         self._requests.sort(key=lambda r: r.sequence)
         details = deque(super().parse_reply(buffer))
         self.__parse_binary_replies(details)
         self.__parse_other_replies(details)
         return self._requests
 
-    def __parse_binary_replies(self, details: deque):
+    def __parse_binary_replies(self, details: deque) -> None:
         binary_requests = [r for r in self._requests if isinstance(r, OneBitRequest)]
         binary_values = deque(OneBitRequest.parse_binary_values(binary_requests, details))
         for request in binary_requests:
             request.pop_values(binary_values)
 
-    def __parse_other_replies(self, details: deque):
+    def __parse_other_replies(self, details: deque) -> None:
         other_requests = [r for r in self._requests if not isinstance(r, OneBitRequest)]
         for request in other_requests:
             request.pop_values(details)
