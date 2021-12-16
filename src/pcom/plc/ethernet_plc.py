@@ -31,8 +31,10 @@ class EthernetPlc(BasePlc):
         try:
             self._socket.connect(self._address)
         except (TimeoutError, socket.timeout, ConnectionRefusedError) as ex:
+            self.close()
             raise PComError(str(ex))
         except OSError as ex:
+            self.close()
             if ex.errno == errno.EHOSTUNREACH:
                 raise PComError(os.strerror(ex.errno))
             else:

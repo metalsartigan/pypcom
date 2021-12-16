@@ -74,7 +74,7 @@ class BinaryCommand(BaseCommand, ABC):
     def __validate_command_number(self, buffer: bytearray) -> None:
         expected = self._command_number + 0x80
         if buffer[12] != expected:
-            raise PComError("Invalid command number in reply. Expected: '%s', got: '%s'" % (expected, buffer[12]), buffer)
+            raise PComError("Invalid command number in reply. Requested data too large? Expected: '%s', got: '%s'" % (expected, buffer[12]), buffer)
 
     def __validate_data_length(self, buffer: bytearray) -> None:
         expected = buffer[20] | buffer[21] << 8

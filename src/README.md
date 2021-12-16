@@ -105,6 +105,9 @@ with EthernetPlc(address=('192.168.5.47', 1616)) as plc:
 
 
 ### Changelog  ###
+#### Version 0.10 ####
+- Add hint about requested data being too large in binary command exception. 
+- Fix: is_online should not be True when connect() fails.
 #### Version 0.9.1 ####
 - Add support for WriteIntegers and WriteFloats commands
 #### Version 0.8 ####

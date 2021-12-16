@@ -61,15 +61,33 @@ class TestEthernetPlc(TestCase):
         side_effect = ethernet_plc.socket.timeout(os.strerror(errno.ETIMEDOUT))
         self._assert_connection_error(mock_connect, mock_close, side_effect, "Connection timed out")
 
+    def test_connect_socket_timeout_no_context_manager(self, mock_connect, mock_close):
+        side_effect = TimeoutError(os.strerror(errno.ETIMEDOUT))
+        self._assert_connection_error_no_context_manager(mock_connect, mock_close, side_effect)
+
     def test_connect_refused(self, mock_connect, mock_close):
         side_effect = ConnectionRefusedError(os.strerror(errno.ECONNREFUSED))
         self._assert_connection_error(mock_connect, mock_close, side_effect, "Connection refused")
+
+    def test_connect_refused_no_context_manager(self, mock_connect, mock_close):
+        side_effect = ConnectionRefusedError(os.strerror(errno.ECONNREFUSED))
+        self._assert_connection_error_no_context_manager(mock_connect, mock_close, side_effect)
 
     def _assert_connection_error(self, mock_connect, mock_close, side_effect, message, error_class=PComError):
         mock_connect.side_effect = side_effect
         with self.assertRaisesRegex(error_class, message):
             with self._plc:
                 pass
+        self.assertFalse(self._plc.is_connected)
+        mock_close.assert_called_once()
+
+    def _assert_connection_error_no_context_manager(self, mock_connect, mock_close, side_effect):
+        mock_connect.side_effect = side_effect
+        try:
+            self._plc.connect()
+            self.skipTest("Connect should have failed. See other connection unit test.")
+        except:
+            pass
         self.assertFalse(self._plc.is_connected)
         mock_close.assert_called_once()
 
