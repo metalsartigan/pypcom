@@ -34,13 +34,11 @@ class OneBitRequest(OperandRequest):
     @classmethod
     def parse_binary_values(cls, instances: list, buffer: deque) -> List[bool]:
         count = sum(r._get_values_count() for r in instances)
-        int_count = math.ceil(count / 16.0)
+        int_count = math.ceil(count / 8.0)
         bits = []
         for _ in range(int_count):
-            byte1 = buffer.popleft()
-            byte2 = buffer.popleft()
-            value = byte1 | (byte2 << 8)
-            bits.extend([b == '1' for b in bin(value)[2:].rjust(16)][-count:][::-1])  # convert, pad, last values, reverse
+            value = buffer.popleft()
+            bits.extend([b == '1' for b in bin(value)[2:].rjust(8)][-count:][::-1])  # convert, pad, last values, reverse
         return bits
 
 

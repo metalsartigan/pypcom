@@ -105,6 +105,8 @@ with EthernetPlc(address=('192.168.5.47', 1616)) as plc:
 
 
 ### Changelog  ###
+#### Version 0.11 ####
+- Fix: IndexError when reading OneBitRequests (MB, SB...)
 #### Version 0.10 ####
 - Add hint about requested data being too large in binary command exception. 
 - Fix: is_online should not be True when connect() fails.

@@ -5,8 +5,36 @@ from pcom.plc import EthernetPlc
 from datetime import timedelta
 
 
-with EthernetPlc(address=('192.168.5.79', 20256)) as plc:
+with EthernetPlc(address=('192.168.5.47', 1616)) as plc:
+    if False:
+        columns = [
+            commands.datatables.ULong(3),  # employee, job, material
+            commands.datatables.Bool(),  # begin / end
+            commands.datatables.Long(3),  # weight, reserved, reserved
+            commands.datatables.Int(3),  # year, day-month, hour-minutes
+            commands.datatables.Byte(),  # seconds
+            commands.datatables.Int(2),  # reserved, reserved
+            commands.datatables.Bool(),  # reserved
+            commands.datatables.Bool(),  # reserved
+        ]
+        structure = commands.datatables.DatatableStructure("Readings", offset=39200,
+                                                              rows=500,
+                                                              columns=columns)
+
+        c = commands.datatables.ReadDatatable(structure=structure, row_count=25)
+        res = plc.send(c)
+        print('test', res)
     if True:
+        cmd = commands.ReadOperands()
+        cmd.add_request(commands.operand_request.MB(addresses=[10, 11, 12, 13, 14, 15, 16, 17, 18, 19]))
+        x = plc.send(cmd)
+        print('reply:', x[0].values)
+    if False:
+        cmd = commands.WriteFloats(address=30, values=[1, -10, 3.3])
+        x = plc.send(cmd)
+        print('reply:', x)
+
+    if False:
         cols = [
             commands.datatables.Int(),  # Quantity
             commands.datatables.Long(),  # Length
