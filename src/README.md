@@ -22,6 +22,11 @@ with EthernetPlc(address=('192.168.5.43', 1616)) as plc:
     values = [True, False, True, True, False]
     c = commands.SetBits(code=commands.SetBits.MEMORY, address=300, values=values)
     plc.send(c)
+    
+    c = commands.ReadOperands()
+    c.add_request(commands.operand_request.MB(addresses=[10, 11, 12, 13, 14, 15, 16, 17, 18, 19]))
+    res = plc.send(cmd)
+    print('reply:', res[0].res)
 ```
 When entering the `with` block, the `plc` instance connects to the PLC
 and the connection is closed when the block is done, or when an error occurs

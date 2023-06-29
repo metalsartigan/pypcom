@@ -8,7 +8,7 @@ setup(
     name='pcom',
     version='0.11',
     packages=setuptools.find_packages(),
-    url='',
+    url='https://github.com/metalsartigan/pypcom/tree/master/src',
     license='MIT License',
     author='Jerther',
     author_email='jtheriault@metalsartigan.com',
