@@ -25,7 +25,7 @@ with EthernetPlc(address=('192.168.5.43', 1616)) as plc:
     
     c = commands.ReadOperands()
     c.add_request(commands.operand_request.MB(addresses=[10, 11, 12, 13, 14, 15, 16, 17, 18, 19]))
-    res = plc.send(cmd)
+    res = plc.send(c)
     print('reply:', res[0].res)
 ```
 When entering the `with` block, the `plc` instance connects to the PLC
